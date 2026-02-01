@@ -209,3 +209,248 @@ Common issues:
 - [Terraform GitHub Actions](https://developer.hashicorp.com/terraform/tutorials/automation/github-actions)
 - [Terraform Cloud](https://developer.hashicorp.com/terraform/tutorials/cloud-get-started)
 - [OIDC with GitHub Actions](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect)
+
+## State Management
+
+### Current Setup (Local State)
+
+This demo uses **local state** for simplicity:
+- State files stored in `environments/{aws,gcp}/.terraform/`
+- **Not suitable for teams or production**
+- Gitignored (never committed)
+
+### Production Recommendations
+
+#### Option 1: S3 Backend (AWS) ⭐ Most Common
+
+**Setup:**
+
+1. Create S3 bucket for state:
+```bash
+aws s3 mb s3://my-terraform-state --region eu-west-1
+```
+
+2. Create DynamoDB table for locking:
+```bash
+aws dynamodb create-table \
+  --table-name terraform-locks \
+  --attribute-definitions AttributeName=LockID,AttributeType=S \
+  --key-schema AttributeName=LockID,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST \
+  --region eu-west-1
+```
+
+3. Update `environments/aws/providers.tf`:
+```hcl
+terraform {
+  backend "s3" {
+    bucket         = "my-terraform-state"
+    key            = "aws/terraform.tfstate"
+    region         = "eu-west-1"
+    encrypt        = true
+    dynamodb_table = "terraform-locks"
+  }
+}
+```
+
+**Benefits:**
+- ✅ Centralized state storage
+- ✅ State locking (prevents concurrent modifications)
+- ✅ Encryption at rest
+- ✅ Version history
+- ✅ Team collaboration
+
+**Cost:** ~$0.02/month (storage) + ~$0/month (locking with free tier)
+
+---
+
+#### Option 2: GCS Backend (GCP)
+
+**Setup:**
+
+1. Create GCS bucket:
+```bash
+gsutil mb -p terraform-demo-486102 -l europe-west1 gs://my-terraform-state/
+```
+
+2. Enable versioning:
+```bash
+gsutil versioning set on gs://my-terraform-state/
+```
+
+3. Update `environments/gcp/providers.tf`:
+```hcl
+terraform {
+  backend "gcs" {
+    bucket = "my-terraform-state"
+    prefix = "gcp"
+  }
+}
+```
+
+**Benefits:**
+- ✅ GCP-native solution
+- ✅ Object versioning
+- ✅ Automatic locking
+- ✅ Encryption by default
+
+**Cost:** ~$0.02/month
+
+---
+
+#### Option 3: Terraform Cloud ⭐ Easiest
+
+**Setup:**
+
+1. Create account: [app.terraform.io](https://app.terraform.io)
+
+2. Create workspace for each environment
+
+3. Update `environments/aws/providers.tf`:
+```hcl
+terraform {
+  cloud {
+    organization = "my-org"
+    
+    workspaces {
+      name = "demo-terraform-aws"
+    }
+  }
+}
+```
+
+4. Login:
+```bash
+terraform login
+```
+
+**Benefits:**
+- ✅ No infrastructure to manage
+- ✅ Built-in locking
+- ✅ UI for viewing state and runs
+- ✅ Cost estimation on plans
+- ✅ Policy as code (Sentinel)
+- ✅ Private module registry
+- ✅ **Free for up to 5 users**
+
+**Cost:** Free tier sufficient for demos/small teams
+
+---
+
+#### Option 4: Azure Storage (if using Azure)
+```hcl
+terraform {
+  backend "azurerm" {
+    resource_group_name  = "terraform-state-rg"
+    storage_account_name = "terraformstate"
+    container_name       = "tfstate"
+    key                  = "terraform.tfstate"
+  }
+}
+```
+
+---
+
+### Comparison
+
+| Backend | Best For | Locking | Cost | Setup Complexity |
+|---------|----------|---------|------|------------------|
+| **Local** | Solo dev, demos | ❌ | Free | Trivial |
+| **S3** | AWS-heavy teams | ✅ | ~$0.02/mo | Medium |
+| **GCS** | GCP-heavy teams | ✅ | ~$0.02/mo | Medium |
+| **Terraform Cloud** | Any platform | ✅ | Free tier | Easy |
+| **Azure Storage** | Azure teams | ✅ | ~$0.02/mo | Medium |
+
+---
+
+### Migration Example (Local → S3)
+
+**If you want to migrate existing state:**
+
+1. Add backend configuration (see above)
+
+2. Re-initialize:
+```bash
+terraform init -migrate-state
+```
+
+3. Confirm migration when prompted
+
+4. Verify:
+```bash
+terraform state list
+# Should work identically
+```
+
+5. Old local state file can be deleted
+
+---
+
+### State Security Best Practices
+
+**Sensitive Data in State:**
+- State files contain resource IDs, IPs, sometimes passwords
+- **Never commit state files to Git**
+- Use encrypted backends (S3 with `encrypt = true`)
+- Restrict access (IAM policies, bucket policies)
+
+**State Locking:**
+- Prevents concurrent `apply` operations
+- Critical for team collaboration
+- DynamoDB (AWS) or built-in (GCS, Terraform Cloud)
+
+**State Backup:**
+- S3/GCS provide versioning
+- Regular backups recommended
+- Test restore procedures
+
+**Example: S3 with strict permissions:**
+```hcl
+resource "aws_s3_bucket_policy" "state_bucket" {
+  bucket = aws_s3_bucket.state.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Deny"
+        Principal = "*"
+        Action = "s3:*"
+        Resource = [
+          "${aws_s3_bucket.state.arn}",
+          "${aws_s3_bucket.state.arn}/*"
+        ]
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
+          }
+        }
+      }
+    ]
+  })
+}
+```
+
+---
+
+### Why Not GitHub for State?
+
+**Even in private repos, avoid storing state in Git:**
+
+❌ **Security:**
+- State contains sensitive data (IPs, resource IDs)
+- Visible in Git history forever
+- Risk of accidental exposure
+
+❌ **No Locking:**
+- Multiple team members can modify simultaneously
+- Risk of corrupted state
+
+❌ **Large Files:**
+- State files grow over time
+- Git not optimized for binary data
+
+❌ **Collaboration:**
+- Merge conflicts on state files = disaster
+- No atomic operations
+
+**Use proper remote backends instead.**
