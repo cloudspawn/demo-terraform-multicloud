@@ -2,7 +2,6 @@
 
 Infrastructure as Code demonstration deploying identical architectures on AWS and GCP using reusable Terraform modules.
 
-![Terraform CI](https://github.com/cloudspawn/demo-terraform-multicloud/actions/workflows/terraform.yml/badge.svg)
 [![Terraform CI](https://github.com/cloudspawn/demo-terraform-multicloud/actions/workflows/terraform.yml/badge.svg)](https://github.com/cloudspawn/demo-terraform-multicloud/actions/workflows/terraform.yml)
 ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
 ![Google Cloud](https://img.shields.io/badge/GoogleCloud-%234285F4.svg?style=for-the-badge&logo=google-cloud&logoColor=white)
