@@ -1,0 +1,31 @@
+# Créer le fichier
+cat > environments/aws/terraform.tfvars.example << 'EOF'
+# AWS Environment Configuration
+# Copy this file to terraform.tfvars and fill with your values
+# WARNING: terraform.tfvars is gitignored and should NEVER be committed
+
+# Project Configuration
+project_name = "terraform-demo"
+environment  = "dev"
+
+# AWS Region
+region = "eu-west-1"  # Change to your preferred region
+
+# Network Configuration
+vpc_cidr             = "10.0.0.0/16"
+public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]
+private_subnet_cidrs = ["10.0.10.0/24", "10.0.20.0/24"]
+availability_zones   = ["eu-west-1a", "eu-west-1b"]
+
+# Tags
+tags = {
+  Project     = "terraform-demo"
+  Environment = "dev"
+  ManagedBy   = "terraform"
+  Owner       = "your-name"
+}
+
+# SENSITIVE VALUES (uncomment and fill in terraform.tfvars, not here!)
+# aws_access_key_id     = "AKIA..."  # Better to use aws configure
+# aws_secret_access_key = "..."      # Better to use aws configure
+EOF

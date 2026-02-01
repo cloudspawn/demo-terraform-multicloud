@@ -1,0 +1,31 @@
+# Créer le fichier
+cat > environments/gcp/terraform.tfvars.example << 'EOF'
+# GCP Environment Configuration
+# Copy this file to terraform.tfvars and fill with your values
+# WARNING: terraform.tfvars is gitignored and should NEVER be committed
+
+# Project Configuration
+project_name = "terraform-demo"
+environment  = "dev"
+
+# GCP Project and Region
+gcp_project_id = "terraform-demo-486102"  # Change to your project ID
+region         = "europe-west1"           # Change to your preferred region
+
+# Network Configuration
+vpc_cidr             = "10.0.0.0/16"
+public_subnet_cidrs  = ["10.0.1.0/24"]
+private_subnet_cidrs = ["10.0.10.0/24"]
+
+# Labels
+labels = {
+  project     = "terraform-demo"
+  environment = "dev"
+  managed_by  = "terraform"
+  owner       = "your-name"
+}
+
+# SENSITIVE VALUES (uncomment and fill in terraform.tfvars, not here!)
+# Service account credentials are better handled via GOOGLE_APPLICATION_CREDENTIALS env var
+# gcp_credentials_file = "/path/to/service-account-key.json"  # Use env var instead
+EOF
