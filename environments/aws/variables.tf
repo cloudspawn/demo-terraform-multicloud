@@ -63,9 +63,3 @@ variable "enable_storage" {
   type        = bool
   default     = true
 }
-
-variable "tags" {
-  description = "Additional tags for resources"
-  type        = map(string)
-  default     = {}
-}
