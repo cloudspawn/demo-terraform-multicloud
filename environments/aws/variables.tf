@@ -1,12 +1,3 @@
-variable "cloud_provider" {
-  description = "Cloud provider (aws or gcp) - REQUIRED"
-  type        = string
-  validation {
-    condition     = contains(["aws", "gcp"], var.cloud_provider)
-    error_message = "Cloud provider must be 'aws' or 'gcp'."
-  }
-}
-
 variable "project_name" {
   description = "Project name for resource naming"
   type        = string
@@ -17,6 +8,12 @@ variable "environment" {
   description = "Environment (dev, staging, prod)"
   type        = string
   default     = "dev"
+}
+
+variable "region" {
+  description = "AWS region"
+  type        = string
+  default     = "eu-west-1"
 }
 
 variable "vpc_cidr" {
@@ -37,13 +34,32 @@ variable "private_subnet_cidrs" {
   default     = ["10.0.10.0/24", "10.0.20.0/24"]
 }
 
-variable "region" {
-  description = "Cloud region"
-  type        = string
-}
-
 variable "availability_zones" {
   description = "Availability zones"
   type        = list(string)
-  default     = []
+  default     = ["eu-west-1a", "eu-west-1b"]
+}
+
+variable "instance_type" {
+  description = "EC2 instance type"
+  type        = string
+  default     = "t2.micro"
+}
+
+variable "instance_count" {
+  description = "Number of instances to create"
+  type        = number
+  default     = 1
+}
+
+variable "enable_compute" {
+  description = "Enable compute resources"
+  type        = bool
+  default     = true
+}
+
+variable "enable_storage" {
+  description = "Enable storage resources"
+  type        = bool
+  default     = true
 }

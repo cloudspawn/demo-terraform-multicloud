@@ -98,6 +98,26 @@ terraform plan
 terraform apply
 ```
 
+## 🤖 GitHub Actions CI/CD
+
+This project includes automated validation via GitHub Actions:
+
+**Automatic Triggers:**
+- Every pull request to `main`
+- Every push to `dev`
+
+**Manual Trigger:**
+- Go to **Actions** tab → **Terraform CI** → **Run workflow**
+- Choose environment (AWS/GCP) and action (validate/plan)
+
+**What gets validated:**
+- ✅ Terraform formatting (`terraform fmt`)
+- ✅ Syntax validation (`terraform validate`)
+- ✅ Best practices (TFLint)
+- ✅ Security scanning (tfsec)
+
+**Note:** The `plan` action will fail without credentials (expected for this demo). See [docs/GITHUB_ACTIONS.md](docs/GITHUB_ACTIONS.md) for full CI/CD setup options.
+
 ### Destroy Infrastructure
 
 ⚠️ **Important:** Always destroy resources after demo to avoid charges!
