@@ -1,4 +1,3 @@
-cat > modules/network/variables.tf << 'EOF'
 variable "cloud_provider" {
   description = "Cloud provider (aws or gcp)"
   type        = string
@@ -48,4 +47,3 @@ variable "availability_zones" {
   type        = list(string)
   default     = []
 }
-EOF

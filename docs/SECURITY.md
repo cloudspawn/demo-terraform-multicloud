@@ -1,4 +1,3 @@
-cat > docs/SECURITY.md << 'EOF'
 # Security Best Practices
 
 ## 🔒 Credentials Management
@@ -141,4 +140,3 @@ Before committing code, verify:
 - [Terraform Security Best Practices](https://www.terraform.io/docs/language/values/variables.html#sensitive-values)
 - [AWS IAM Best Practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html)
 - [GCP Security Best Practices](https://cloud.google.com/security/best-practices)
-EOF

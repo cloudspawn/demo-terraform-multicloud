@@ -1,4 +1,3 @@
-cat > modules/network/main.tf << 'EOF'
 # AWS VPC
 resource "aws_vpc" "main" {
   count                = var.cloud_provider == "aws" ? 1 : 0
@@ -150,4 +149,3 @@ resource "google_compute_firewall" "allow_ssh" {
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["ssh-enabled"]
 }
-EOF
