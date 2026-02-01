@@ -13,6 +13,24 @@ on:
       - '**.tf'
       - '**.tfvars.example'
       - '.github/workflows/terraform.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to validate (aws or gcp)'
+        required: true
+        type: choice
+        default: 'aws'
+        options:
+          - aws
+          - gcp
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        default: 'validate'
+        options:
+          - validate
+          - plan
 
 jobs:
   terraform-validation:
