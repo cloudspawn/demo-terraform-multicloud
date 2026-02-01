@@ -2,7 +2,8 @@
 
 Infrastructure as Code demonstration deploying identical architectures on AWS and GCP using reusable Terraform modules.
 
-![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?style=for-the-badge&logo=terraform&logoColor=white)
+![Terraform CI](https://github.com/cloudspawn/demo-terraform-multicloud/actions/workflows/terraform.yml/badge.svg)
+[![Terraform CI](https://github.com/cloudspawn/demo-terraform-multicloud/actions/workflows/terraform.yml/badge.svg)](https://github.com/cloudspawn/demo-terraform-multicloud/actions/workflows/terraform.yml)
 ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
 ![Google Cloud](https://img.shields.io/badge/GoogleCloud-%234285F4.svg?style=for-the-badge&logo=google-cloud&logoColor=white)
 
@@ -130,6 +131,30 @@ terraform destroy
 cd environments/gcp
 terraform destroy
 ```
+
+## ✅ Tested and Validated
+
+This infrastructure has been successfully deployed and tested on both cloud providers:
+
+**AWS Deployment:**
+- ✅ VPC with public/private subnets
+- ✅ EC2 t2.micro instance (Free Tier)
+- ✅ S3 bucket with encryption
+- ✅ Total cost: $0 (Free Tier)
+
+**GCP Deployment:**
+- ✅ VPC network with custom subnets
+- ✅ Compute Engine e2-micro instance
+- ✅ Cloud Storage bucket
+- ✅ Total cost: ~$0.01 (from $300 free credits)
+
+**CI/CD Pipeline:**
+- ✅ Automated validation on every PR
+- ✅ Format, lint, and security checks
+- ✅ Matrix builds for AWS + GCP
+- ✅ All checks passing
+
+See [docs/screenshots/](docs/screenshots/) for deployment evidence.
 
 ## Project Structure
 ```
