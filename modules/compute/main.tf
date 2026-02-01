@@ -92,7 +92,7 @@ resource "google_compute_instance" "main" {
   count        = var.cloud_provider == "gcp" ? var.instance_count : 0
   name         = "${var.project_name}-${var.environment}-instance-${count.index + 1}"
   machine_type = var.machine_type
-  zone         = "${var.region}-a"
+  zone         = "${var.region}-b"
   project      = var.gcp_project_id
 
   boot_disk {

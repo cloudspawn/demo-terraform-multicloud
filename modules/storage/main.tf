@@ -66,13 +66,6 @@ resource "google_storage_bucket" "main" {
     enabled = var.versioning_enabled
   }
 
-  dynamic "encryption" {
-    for_each = var.encryption_enabled ? [1] : []
-    content {
-      default_kms_key_name = null
-    }
-  }
-
   uniform_bucket_level_access = true
 
   labels = {

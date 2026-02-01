@@ -209,3 +209,133 @@ Common issues:
 - [Terraform GitHub Actions](https://developer.hashicorp.com/terraform/tutorials/automation/github-actions)
 - [Terraform Cloud](https://developer.hashicorp.com/terraform/tutorials/cloud-get-started)
 - [OIDC with GitHub Actions](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect)
+
+## State Management
+
+### Current Setup (Local State)
+
+This demo uses **local state** for simplicity:
+- State files stored in `environments/{aws,gcp}/.terraform/`
+- **Not suitable for teams or production**
+- Gitignored (never committed)
+
+### Production Recommendations
+
+#### Option 1: S3 Backend (AWS) ⭐ Most Common
+
+**Setup:**
+
+1. Create S3 bucket:
+```bash
+aws s3 mb s3://my-terraform-state --region eu-west-1
+```
+
+2. Create DynamoDB table for locking:
+```bash
+aws dynamodb create-table \
+  --table-name terraform-locks \
+  --attribute-definitions AttributeName=LockID,AttributeType=S \
+  --key-schema AttributeName=LockID,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST
+```
+
+3. Update `environments/aws/providers.tf`:
+```hcl
+terraform {
+  backend "s3" {
+    bucket         = "my-terraform-state"
+    key            = "aws/terraform.tfstate"
+    region         = "eu-west-1"
+    encrypt        = true
+    dynamodb_table = "terraform-locks"
+  }
+}
+```
+
+**Benefits:**
+- ✅ Centralized state
+- ✅ State locking
+- ✅ Encryption at rest
+- ✅ Team collaboration
+
+**Cost:** ~$0.02/month
+
+---
+
+#### Option 2: GCS Backend (GCP)
+
+**Setup:**
+
+1. Create bucket:
+```bash
+gsutil mb -p PROJECT_ID -l europe-west1 gs://my-terraform-state/
+gsutil versioning set on gs://my-terraform-state/
+```
+
+2. Update `environments/gcp/providers.tf`:
+```hcl
+terraform {
+  backend "gcs" {
+    bucket = "my-terraform-state"
+    prefix = "gcp"
+  }
+}
+```
+
+**Benefits:**
+- ✅ GCP-native
+- ✅ Automatic locking
+- ✅ Versioning
+
+**Cost:** ~$0.02/month
+
+---
+
+#### Option 3: Terraform Cloud ⭐ Easiest
+
+**Setup:**
+
+1. Create account: [app.terraform.io](https://app.terraform.io)
+2. Create workspace
+3. Update providers.tf:
+```hcl
+terraform {
+  cloud {
+    organization = "my-org"
+    workspaces {
+      name = "demo-terraform-aws"
+    }
+  }
+}
+```
+
+**Benefits:**
+- ✅ No infrastructure
+- ✅ Built-in locking
+- ✅ UI for runs
+- ✅ Cost estimation
+- ✅ **Free for 5 users**
+
+---
+
+### Comparison
+
+| Backend | Best For | Locking | Cost | Setup |
+|---------|----------|---------|------|-------|
+| **Local** | Solo dev | ❌ | Free | Trivial |
+| **S3** | AWS teams | ✅ | $0.02/mo | Medium |
+| **GCS** | GCP teams | ✅ | $0.02/mo | Medium |
+| **Terraform Cloud** | Any | ✅ | Free tier | Easy |
+
+---
+
+### Why Not GitHub?
+
+**Never store state in Git (even private repos):**
+
+❌ State contains sensitive data
+❌ No locking mechanism
+❌ Large files (Git inefficient)
+❌ Merge conflicts = disaster
+
+**Use proper remote backends instead.**
