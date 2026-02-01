@@ -66,18 +66,6 @@ resource "google_storage_bucket" "main" {
     enabled = var.versioning_enabled
   }
 
-  # Encryption simplified (Google-managed keys by défaut)
-  # no need for encryption explicite
-
-  uniform_bucket_level_access = true
-
-  labels = {
-    environment = var.environment
-    managed_by  = "terraform"
-    project     = var.project_name
-  }
-}
-
   uniform_bucket_level_access = true
 
   labels = {
