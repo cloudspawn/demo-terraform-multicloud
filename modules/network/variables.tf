@@ -1,5 +1,5 @@
 variable "cloud_provider" {
-  description = "Cloud provider (aws or gcp)"
+  description = "Cloud provider (aws or gcp) - REQUIRED"
   type        = string
   validation {
     condition     = contains(["aws", "gcp"], var.cloud_provider)
